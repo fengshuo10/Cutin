@@ -10,19 +10,20 @@ NDD = table;
 
 % obtain surrogate model performance and off-line library
 F_IDModel;
-F_SurrModel = F_IDM;
+F_FVDModel;
+F_SurrModel = F_FVDM;
 min_epislon = 0.1;
 Lib_Off = Library_Generation(table,F_SurrModel, min_epislon);
 
 % obtain ground truth: Switch_ACC performace and optimal library
 F_ACCModel;
-F_CAV = F_ACC;
+F_CAV = F_IDM;
 Lib_Opt = Library_Generation(table,F_CAV, 0);
 
 % Offline library test
 
-N_OffLib = 1e2;
-[ ~, Id_Sam_OffLib ] = Samp_P(x_label, y_label, Lib_Off, N_OffLib, 1e6);
+N_OffLib = 1e5;
+[ ~, Id_Sam_OffLib ] = Samp_P(x_label, y_label, Lib_Off, N_OffLib, 1e7);
 Result_OffLib = zeros(1,N_OffLib);
 acc_rate_OffLib = zeros(1,N_OffLib);
 Likely_OffLib = zeros(1,N_OffLib);
