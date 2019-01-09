@@ -26,6 +26,7 @@ F_err_sam = zeros(N_1,N_2);
 %% step 1: initial sampling
 % library sampling
 [ ~, Id_Sam_P ] = Samp_P(x_label, y_label, q, N_Ini_lib, 1e6);
+
 % random sampling
 id_x = randi(N_1,1,N_Ini_rd);
 id_y = randi(N_2,1,N_Ini_rd);
@@ -112,8 +113,8 @@ for j=1:N_test
         s2_c = [s2_c;s2];
     end
     
-%     mu_c = [mu_c;mu(end,1)];
-%     s2_c = [s2_c;s2(end,1)];
+    mu_c = [mu_c;mu(end,1)];
+    s2_c = [s2_c;s2(end,1)];
     clear mu s2 f;
     
     mu = mu_c;
@@ -171,37 +172,47 @@ for j=1:N_test
     F_err_Adap = zeros(N_1,N_2);
     F_err_Adap = f_x - f_x_new;
 
-    %% check feasibility of f_x_new
-    d_pos = max(f_x_new(:)-1);
-    d_neg = min(f_x_new(:));
+%     %% check feasibility of f_x_new
+%     d_pos = max(f_x_new(:)-1);
+%     d_neg = min(f_x_new(:));
+% 
+%     if d_pos > 0.1 || d_neg < -0.1
+%         if d_pos > -d_neg
+%             x_next_id = find(f_x_new-1 == d_pos,1);
+%             x_next_id_2 = mod(x_next_id, N_2);
+%             x_next_id_1 = (x_next_id-x_next_id_2) / N_1;
+%             x_next_id = [x_next_id_1, x_next_id_2];
+%             x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
+%         else
+%             x_next_id = find(f_x_new-1 == d_neg,1);
+%             x_next_id_2 = mod(x_next_id, N_2);
+%             x_next_id_1 = (x_next_id-x_next_id_2) / N_1;
+%             x_next_id = [x_next_id_1, x_next_id_2];
+%             x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
+%         end
+% 
+%     else
+%         % feasible
+%         x_next_id = find(In_X==max(In_X(:)),1);
+%         x_next_id_1 = mod(x_next_id, N_1);
+%         if x_next_id_1 == 0
+%             x_next_id_1 = N_1;
+%         end
+%         x_next_id_2 = (x_next_id-x_next_id_1) / N_1 + 1;
+%         x_next_id = [x_next_id_1, x_next_id_2];
+%         x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
+%     end
 
-    if d_pos > 0.1 || d_neg < -0.1
-        if d_pos > -d_neg
-            x_next_id = find(f_x_new-1 == d_pos,1);
-            x_next_id_2 = mod(x_next_id, N_2);
-            x_next_id_1 = (x_next_id-x_next_id_2) / N_1;
-            x_next_id = [x_next_id_1, x_next_id_2];
-            x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
-        else
-            x_next_id = find(f_x_new-1 == d_neg,1);
-            x_next_id_2 = mod(x_next_id, N_2);
-            x_next_id_1 = (x_next_id-x_next_id_2) / N_1;
-            x_next_id = [x_next_id_1, x_next_id_2];
-            x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
-        end
-
-    else
-        % feasible
-        x_next_id = find(In_X==max(In_X(:)),1);
-        x_next_id_1 = mod(x_next_id, N_1);
-        if x_next_id_1 == 0
-            x_next_id_1 = N_1;
-        end
-        x_next_id_2 = (x_next_id-x_next_id_1) / N_1 + 1;
-        x_next_id = [x_next_id_1, x_next_id_2];
-        x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
+    %% decide next testing scenario
+    x_next_id = find(In_X==max(In_X(:)),1);
+    x_next_id_1 = mod(x_next_id, N_1);
+    if x_next_id_1 == 0
+        x_next_id_1 = N_1;
     end
-
+    x_next_id_2 = (x_next_id-x_next_id_1) / N_1 + 1;
+    x_next_id = [x_next_id_1, x_next_id_2];
+    x_next = [x_label(x_next_id_1), y_label(x_next_id_2)];
+        
     %% add random sample
     r0 = 0.1;
     seed = rand(1);

@@ -9,17 +9,16 @@ NDD = table;
 % obtain surrogate model performance and off-line library
 F_FVDModel;
 F_IDModel;
-F_IDM(NDD>2e-3)=1;
-F_SurrModel = F_IDM;
+F_SurrModel = F_FVDM;
 min_epislon = 0.05;
 Lib_Off = Library_Generation(table,F_SurrModel, min_epislon);
 
 % obtain ground truth: Switch_ACC performace and optimal library
 F_ACCModel;
-F_CAV = F_FVDM;
+F_CAV = F_ACC;
 Lib_Opt = Library_Generation(table,F_CAV,min_epislon);
 
-F_err = F_CAV - F_IDM;
+F_err = F_CAV - F_SurrModel;
 % Adaptive testing
 N_Ini = 50;
 N_test = 100;
