@@ -17,7 +17,7 @@ axis(ax1,[-inf, inf, 0, 2e-3]);
 % online
 ax2 = axes('Position',get(ax1,'Position'),'XAxisLocation','top','color','none','XColor','r','YColor','none');
 hold on
-fig_OnLib = plot(acc_rate_OnLib, 'k-', 'linewidth',2.5,'Parent',ax2);
+fig_OnLib = plot(acc_rate_OnLib, 'r-', 'linewidth',2.5,'Parent',ax2);
 legend([fig_OffLib,fig_OnLib],'Offline Library Evaluation','Adaptive Library Evaluation');
 xlabel(ax1,'Test Time','Color','k');
 ylabel(ax1,'Accident Rate','Color','k');
@@ -95,7 +95,7 @@ for i=1:N_hf
     hald_wid_OnLib_tmp(1:N_valid_on)=1;
     hald_wid_OnLib_tmp(hald_wid_OnLib_tmp>half(i))=0;
     [~,test_num_on(i)] = max(hald_wid_OnLib_tmp);
-    test_num_on(i) = test_num_on(i) + 600;
+    test_num_on(i) = test_num_on(i) + 100;
 end
 figure;
 plot(half,test_num_off,'b','linewidth',3);
