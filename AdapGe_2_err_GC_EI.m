@@ -1,4 +1,4 @@
-function [ F_Adap, Lib_Adap, Var_Adap, F_err_Adap, result_all ] = AdapGe_2_err_GC( N_Ini, N_test, x_label, y_label, F_SurrModel,F_CAV,Lib_Off,Lib_Opt, NDD )
+function [ F_Adap, Lib_Adap, Var_Adap, F_err_Adap, result_all ] = AdapGe_2_err_GC_EI( N_Ini, N_test, x_label, y_label, F_SurrModel,F_CAV,Lib_Off,Lib_Opt, NDD )
 
 % 2-dimension generation
 % classification by performance error
@@ -77,12 +77,12 @@ for j=1:N_test
     likfunc = @likErf;
     hyp = minimize(hyp, @gp, -100, @infEP, meanfunc, covfunc, likfunc, TrainData, class_sce');
     [mean_tg, var_tg, c, d, lp] = gp(hyp, @infEP, meanfunc, covfunc, likfunc, TrainData, class_sce', xs', ones(N_1*N_2, 1));
-    class_M = Get_Matrix(x_label, y_label, xs',exp(lp));
+    P_class_M = Get_Matrix(x_label, y_label, xs',exp(lp));
     var_tg_M = Get_Matrix(x_label, y_label, xs',var_tg);
     
     
     %% seperate the data by classification
-    th_class = 0.7;
+%     th_class = 0.7;
     sc_0 = sce(:,class_sce==-1);
     y_0 = result(class_sce==-1);
     sc_n0 = sce(:,class_sce==1);
@@ -91,52 +91,46 @@ for j=1:N_test
     Y_Class = {y_0, y_n0};
     
     % prediction points
-    pre_0 = xs(:,exp(lp')<th_class);
-    pre_n0 = xs(:,exp(lp')>=th_class);
-    xs_Class = {pre_0, pre_n0};
-    
+%     pre_0 = xs(:,exp(lp')<th_class);
+%     pre_n0 = xs(:,exp(lp')>=th_class);
+%     xs_Class = {pre_0, pre_n0};
+%     
     %% regression
     meanfunc = [];                    % empty: don't use a mean function
     covfunc = @covSEiso;              % Squared Exponental covariance function
     likfunc = @likGauss;              % Gaussian likelihood
 
     hyp_rg = struct('mean', [], 'cov', [0 0], 'lik', -10);
-    mu_c = [];
-    s2_c = [];
+    mu_c = {};
+    s2_c = {};
     f_c = [];
     m = 2;
-    
+
     for c = 1:m
         x_sam_c = X_Class{c}';
         y_sam_c = Y_Class{c}';
-        xs_c = xs_Class{c}';
-        
+
         hyp_rg2 = minimize(hyp_rg, @gp, -100, @infGaussLik, meanfunc, covfunc, likfunc, x_sam_c, y_sam_c);
-        [mu,s2] = gp(hyp_rg2, @infGaussLik, meanfunc, covfunc, likfunc, x_sam_c, y_sam_c, xs_c);
+        [mu,s2] = gp(hyp_rg2, @infGaussLik, meanfunc, covfunc, likfunc, x_sam_c, y_sam_c, xs');
         
-        mu_c = [mu_c;mu];
-        s2_c = [s2_c;s2];
+        mu_c{c} = mu;
+        s2_c{c} = s2;
     end
     
-    mu_c = [mu_c;mu(end,1)];
-    s2_c = [s2_c;s2(end,1)];
-    clear mu s2 f;
+    Pre_Perf_0 = Get_Matrix(x_label, y_label, xs',mu_c{1});
+    Pre_Perf_n0 = Get_Matrix(x_label, y_label, xs',mu_c{2});
+    Pre_Var_0 = Get_Matrix(x_label, y_label, xs',s2_c{1});
+    Pre_Var_n0 = Get_Matrix(x_label, y_label, xs',s2_c{2});
     
-    mu = mu_c;
-    s2 = s2_c;
-    f = [mu+2*sqrt(s2); flipdim(mu-2*sqrt(s2),1)];
-    clear mu_c s2_c f_c;
+%     % reformate the prediction
+%     ori_pre_perf = [pre_0,pre_n0];
+%     Pre_Perf = Get_Matrix(x_label, y_label, ori_pre_perf',mu);
+%     Pre_Var = Get_Matrix(x_label, y_label, ori_pre_perf',s2);
     
-    % reformate the prediction
-    ori_pre_perf = [pre_0,pre_n0];
-    Pre_Perf = Get_Matrix(x_label, y_label, ori_pre_perf',mu);
-    Pre_Var = Get_Matrix(x_label, y_label, ori_pre_perf',s2);
-
     
     %% compute E(M(X))
-    EM_X = zeros(N_1,N_2);
-
     % calculate f(x) and q(x)
+    Pre_Perf = P_class_M .* Pre_Perf_n0 + (1-P_class_M) .* Pre_Perf_0;
     f_x_new = Pre_Perf + F_SurrModel;
     
     % boundary adjustment
@@ -154,16 +148,12 @@ for j=1:N_test
     tmp = q_new(~I_zero);
     q_new(~I_zero) = (1-epsilon) .* tmp ./ sum(tmp(:));
 
-    EM_X = p_x ./ q_new .* (f_x_new.^2 + Pre_Var);
+%     EM_X = p_x ./ q_new .* (f_x_new.^2 + Pre_Var);
+    In_X = P_class_M .*  p_x.^2 ./ q_new .* ( (F_SurrModel+Pre_Perf_n0).^2 + Pre_Var_n0 ) + (1-P_class_M) .* p_x.^2 ./ q_new .* ( (F_SurrModel+Pre_Perf_0).^2 + Pre_Var_0 );
+    
 
-    % normalization
-    EM_X = EM_X ./ max(EM_X(:));
 
     
-    %% compute weighted index
-    w = 0.5;
-    %In_X = var_tg_M ./ max(var_tg_M(:)) + w * EM_X ;
-    In_X = 
 
     
     %% variance truth

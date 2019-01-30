@@ -22,8 +22,8 @@ F_err = F_CAV - F_SurrModel;
 % Adaptive testing
 N_Ini = 50;
 N_test = 50;
-[ F_Adap, Lib_Adap, Var_Adap, F_err_Adap, result_all ] = AdapGe_2_err_GC(N_Ini, N_test, x_label, y_label, F_SurrModel,F_CAV,Lib_Off,Lib_Opt, NDD);
-
+%[ F_Adap, Lib_Adap, Var_Adap, F_err_Adap, result_all ] = AdapGe_2_err_GC(N_Ini, N_test, x_label, y_label, F_SurrModel,F_CAV,Lib_Off,Lib_Opt, NDD);
+[ F_Adap, Lib_Adap, Var_Adap, F_err_Adap, result_all ] = AdapGe_2_err_GC_EI(N_Ini, N_test, x_label, y_label, F_SurrModel,F_CAV,Lib_Off,Lib_Opt, NDD);
 save lib_online.mat
 
 
