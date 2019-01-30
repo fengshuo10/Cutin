@@ -162,8 +162,8 @@ for j=1:N_test
     
     %% compute weighted index
     w = 0.5;
-    In_X = var_tg_M ./ max(var_tg_M(:)) + w * EM_X ;
-    
+    %In_X = var_tg_M ./ max(var_tg_M(:)) + w * EM_X ;
+    In_X = 
 
     
     %% variance truth
