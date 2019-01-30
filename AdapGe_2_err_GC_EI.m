@@ -82,7 +82,7 @@ for j=1:N_test
     
     
     %% seperate the data by classification
-%     th_class = 0.7;
+%     th_class = 0.5;
     sc_0 = sce(:,class_sce==-1);
     y_0 = result(class_sce==-1);
     sc_n0 = sce(:,class_sce==1);
@@ -151,8 +151,14 @@ for j=1:N_test
 %     EM_X = p_x ./ q_new .* (f_x_new.^2 + Pre_Var);
     In_X = P_class_M .*  p_x.^2 ./ q_new .* ( (F_SurrModel+Pre_Perf_n0).^2 + Pre_Var_n0 ) + (1-P_class_M) .* p_x.^2 ./ q_new .* ( (F_SurrModel+Pre_Perf_0).^2 + Pre_Var_0 );
     
-
-
+    % 01-30-2019, 12:00, fail.
+    % define a set
+    lib_set = Lib_Off>2e-5;
+    n0_set = P_class_M > 0.7;
+    var_set = var_tg_M > 0.5;
+    feasible_set = lib_set + n0_set + var_set;
+    feasible_set(feasible_set>0)=1;
+    In_X(feasible_set==0)=0;
     
 
     
