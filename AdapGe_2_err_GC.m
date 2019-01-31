@@ -26,7 +26,7 @@ u_off = sum(sum(p_x .* f_x));
 Var_Adap(1) = log10( sum(sum(var_off)) - u_off^2) ;
 
 % delt_x = 1e-2;
-F_err_sam = zeros(N_1,N_2);
+F_err_sam = ones(N_1,N_2);
 
 %% step 1: initial sampling
 % library sampling
@@ -56,8 +56,12 @@ class_sce(result~=0)=1;
 class_sce(result==0)=-1;
 
 figure;
-imagesc(F_err_sam);
-title('F-err-sam')
+imagesc(y_label, x_label, F_err_sam);
+axis xy
+xlabel('Range Rate (m/s)');
+ylabel('Range (m)');
+colorbar;
+set(gca,'FontName','Times New Roman','FontSize',14);
 
 xs = [];
 for L=1:N_1
